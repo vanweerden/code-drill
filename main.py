@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import os
 from os import listdir
 from os.path import isfile, join
 import importlib.util
@@ -26,6 +27,12 @@ okcount
 easycount
 '''
 
+# Helper functions (export to a utils file)
+def clear_terminal_screen():
+    # NOTE: This works for Linux. Windows works differently
+    clear = lambda: os.system('clear')
+    clear()
+
 
 # SET WORKING DIRECTORY
 working_dir = sys.argv[1]
@@ -44,6 +51,8 @@ filenames = [f for f in listdir(working_dir) if isfile(join(working_dir, f)) and
 # Read from index file 
 
 # STUDY LOOP
+clear_terminal_screen()
+
 keep_studying = True
 index = 0
 problem_count = len(filenames)
@@ -56,27 +65,29 @@ while keep_studying:
     prompt = getattr(module, 'prompt', None)
     solution = getattr(module, 'solution', None)
 
+    print("\n================ QUESTION ================\n")
     print(prompt)
-    print("Press any key to see solution")
     # BUG: This keyboard read is also applied to the (y/n) below
-    keyboard.read_event()
-    print("SOLUTION")
+    confirm_see_solution = input("\nPress any key to see solution")
+    
+    print("\n================ SOLUTION ================\n")
     print(solution)
+    print("\n==========================================\n")
     
     # If no problems left, notify user and exit
     index += 1
-    print(f"problem_count: {problem_count}")
-
-    print(f"index: {index}")
     if index >= problem_count:
         print("You've studied all the problems!")
         keep_studying = False
     else:
         # BUG: The above keyboard event seems to "count" here 
-        res = input("Keep studying? (y/n)")
-        keep_studying = res.lower() == 'y' or res.lower() == 'yes'
+        print(f"{problem_count - index+1} problems left")
+        res = input("Press (n/N) to stop")
+        keep_studying = res.lower() != 'n' and res.lower() != 'no'
         if keep_studying:
-            print ("==================")
+            clear_terminal_screen()
+        else:
+            break
 
 # SELECT FILE
     # 
