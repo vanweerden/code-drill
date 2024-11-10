@@ -7,25 +7,8 @@ from os.path import isfile, join
 import importlib.util
 import keyboard
 import yaml
-
-'''
-File structure: JSON with the following props
-subject
-prompt
-solution
-notes
-'''
-
-'''
-Index file tracks metadata
-JSON key-value where key is filename with props:
-subject
-path
-last viewed
-failcount
-okcount
-easycount
-'''
+import time
+from utilities import * 
 
 # Helper functions (export to a utils file)
 def clear_terminal_screen():
@@ -34,34 +17,26 @@ def clear_terminal_screen():
     clear()
 
 
-# SET WORKING DIRECTORY
-stream = open("config.yaml", 'r')
-options = yaml.load(stream, Loader=yaml.CLoader)
+# GET LIST OF FILENAMES
+options = {}
+with open("config.yaml", 'r') as stream:
+    options = yaml.safe_load(stream)
 working_dir = options["root-directory"]
-indexfilename = "._index"
+indexfilepath = f"{working_dir}/._index"
 
-print(working_dir)
-
-filenames = [f for f in listdir(working_dir) if isfile(join(working_dir, f)) and f != "._index"]
 
 # INIT CHECKS
-# Check for index file. If not, create it in working_directory
-# with open(f"{working_dir}/._index", 'w') as f:
-#     for f in filelist:
-    # Add any new files to the .index JSON file
-    # Update properties of each one if different
+filenames = [f for f in listdir(working_dir) if isfile(join(working_dir, f)) and f != "._index"]
+index_dict = initialise_config(indexfilepath, filenames)
+prompts = get_ordered_prompts(index_dict)
 
-# GET PROBLEM LIST
-# Read from index file 
-
-# STUDY LOOP
+# BEGIN STUDY LOOP
 clear_terminal_screen()
-
 keep_studying = True
 index = 0
-problem_count = len(filenames)
+problem_count = len(prompts)
 while keep_studying:
-    filename = filenames[index]
+    filename = prompts[index]
     filepath = f"{working_dir}/{filename}"
     spec = importlib.util.spec_from_file_location(f"module.{filename}", filepath)
     module = importlib.util.module_from_spec(spec)
@@ -78,6 +53,8 @@ while keep_studying:
     print(solution)
     print("\n==========================================\n")
     
+    update_last_seen(indexfilepath, filename)
+
     # If no problems left, notify user and exit
     index += 1
     if index >= problem_count:
