@@ -6,7 +6,7 @@ from os import listdir
 from os.path import isfile, join
 import importlib.util
 import keyboard
-
+import yaml
 
 '''
 File structure: JSON with the following props
@@ -35,8 +35,12 @@ def clear_terminal_screen():
 
 
 # SET WORKING DIRECTORY
-working_dir = sys.argv[1]
+stream = open("config.yaml", 'r')
+options = yaml.load(stream, Loader=yaml.CLoader)
+working_dir = options["root-directory"]
 indexfilename = "._index"
+
+print(working_dir)
 
 filenames = [f for f in listdir(working_dir) if isfile(join(working_dir, f)) and f != "._index"]
 
