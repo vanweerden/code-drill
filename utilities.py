@@ -11,28 +11,62 @@ def initialise_config(index_filepath, file_list):
 
     current_date = datetime.now().strftime('%Y-%m-%d')
 
+    # Add new files
     for filename in file_list:
         if filename not in index_dict:
-            index_dict[filename] = None
+            index_dict[filename] = {
+                last_seen: None,
+                difficulty: None,
+                completion_count: 0
+            }
+
 
     with open(index_filepath, 'w') as index_file:
         yaml.dump(index_dict, index_file, default_flow_style=False, sort_keys=False)
     
     return index_dict
 
-def update_last_seen(index_filepath, filename):
+def update_metadata(index_filepath, filename, rating_input):
     try:
         with open(index_filepath, 'r') as file:
             index_dict = yaml.safe_load(file) or {}
     except FileNotFoundError:
         index_dict = {}
     
-    current_date = datetime.now()
-    index_dict[filename] = current_date
+    # Convert difficulty from 1, 2, 3 to 
+    input_to_difficulty_map = {
+        1: 0, # "Easy"
+        2: 5, # "So-so"
+        3: 10, # "Hard"
+    }
+
+    completion_count = index_dict[filename].get("completion_count", 0) + 1
+    current_rating = input_to_difficulty_map[rating_input]
+    previous_difficulty = index_dict[filename].get("difficulty", None)
+    if previous_difficulty == None:
+        previous_difficulty = current_rating
+
+    updated_difficulty = int(round((float(previous_difficulty) + float(current_rating)) / 2, 0))
+    print(updated_difficulty)
+
+    index_dict[filename]["last_seen"] = datetime.now()
+    index_dict[filename]["completion_count"] = completion_count
+    index_dict[filename]["difficulty"] = updated_difficulty
 
     with open(index_filepath, 'w') as index_file:
         yaml.dump(index_dict, index_file, default_flow_style=False, sort_keys=False)
 
+def card_sort_key(card):
+    # Returns a tuple containing key for sorting (new_card_sort, difficulty, date last seen)
+    last_seen = card[1]["last_seen"]
+    difficulty = card[1]["difficulty"] if card[1]["difficulty"] != None else 5
+    print(difficulty)
+    if last_seen is None:
+        return (0, -difficulty, datetime.min)
+    else:
+        return (1, -difficulty, last_seen)
+
 def get_ordered_prompts(index_dict):
-    # Takes dictionary of files and returns sorted list of file names
-    return list(dict(sorted(index_dict.items(), key=lambda item: (item[1] is not None, item[1]))).keys())
+    return list(dict(sorted(index_dict.items(), key=card_sort_key)))
+    # return list(dict(sorted(index_dict.items(), key=lambda item: (item[1]["last_seen"] is not None, item[1]["last_seen"]))).keys())
+
