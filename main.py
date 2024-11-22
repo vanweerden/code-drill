@@ -2,38 +2,23 @@
 
 import sys
 import os
-from os import listdir
-from os.path import isfile, join
 import importlib.util
 import keyboard
 import yaml
 import time
 from utilities import * 
 
-verbose = True
+verbose = False
 
-# Helper functions (export to a utils file)
-def clear_terminal_screen():
-    # NOTE: This works for Linux. Windows works differently
-    clear = lambda: os.system('clear')
-    clear()
-
-# GET LIST OF FILENAMES
-options = {}
-with open("config.yaml", 'r') as stream:
-    options = yaml.safe_load(stream)
-working_dir = options["root-directory"]
+# INITTIALISE
+working_dir = get_working_directory()
 indexfilepath = f"{working_dir}/._index"
 
-# INIT CHECKS
-filenames = [f for f in listdir(working_dir) if isfile(join(working_dir, f)) and f != "._index"]
-index_dict = initialise_config(indexfilepath, filenames)
-prompts = get_ordered_prompts(index_dict)
+prompts = get_prompts(working_dir)
+
+clear_terminal_screen()
 
 # BEGIN STUDY LOOP
-clear_terminal_screen()
-print(prompts)
-
 keep_studying = True
 index = 0
 problem_count = len(prompts)
@@ -79,14 +64,3 @@ while keep_studying:
         else:
             break
 
-# SELECT FILE
-    # 
-# PARSE FILE
-# DISPLAY PROMPT
-# USER INPUT:
-    # Pass, Fail
-    # Update last time file seen
-    # Show solution and notes
-# Prompt: "Continue?"
-    # If no, kill loop
-    # If yes, select next file in queue 

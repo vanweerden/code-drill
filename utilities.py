@@ -1,6 +1,10 @@
 import yaml
 from datetime import datetime
 import random
+import os
+from os import listdir
+from os.path import isfile, join
+
 
 def initialise_config(index_filepath, file_list):
     try:
@@ -15,9 +19,9 @@ def initialise_config(index_filepath, file_list):
     for filename in file_list:
         if filename not in index_dict:
             index_dict[filename] = {
-                last_seen: None,
-                difficulty: None,
-                completion_count: 0
+                'last_seen': None,
+                'difficulty': None,
+                'completion_count': 0
             }
 
 
@@ -66,7 +70,19 @@ def card_sort_key(card):
     else:
         return (1, -difficulty, last_seen)
 
-def get_ordered_prompts(index_dict):
+def get_prompts(working_dir):
+    indexfilepath = f"{working_dir}/._index"
+    filenames = [f for f in listdir(working_dir) if isfile(join(working_dir, f)) and f != "._index"]
+    index_dict = initialise_config(indexfilepath, filenames)
     return list(dict(sorted(index_dict.items(), key=card_sort_key)))
-    # return list(dict(sorted(index_dict.items(), key=lambda item: (item[1]["last_seen"] is not None, item[1]["last_seen"]))).keys())
 
+def clear_terminal_screen():
+    # NOTE: This works for Linux. Windows works differently
+    clear = lambda: os.system('clear')
+    clear()
+
+def get_working_directory():
+    options = {}
+    with open("config.yaml", 'r') as stream:
+        options = yaml.safe_load(stream)
+    return options["root-directory"]
