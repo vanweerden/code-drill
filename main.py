@@ -8,7 +8,7 @@ import yaml
 import time
 from utilities import * 
 
-verbose = False
+verbose = True
 
 # INITTIALISE
 working_dir = get_working_directory()
@@ -45,9 +45,9 @@ while keep_studying:
     print("\n==========================================\n")
     
     # GET DIFFICULTY
-    difficulty_input = input("How difficult was that? (1: easy, 2: so-so, 3: hard)" )
-    while difficulty_input not in ["1", "2", "3"]:
-        difficulty_input = input("That is not an option. Please enter 1 (easy), 2 (so-so), or 3 (hard)" )
+    difficulty_input = input("How difficult was that? (0: impossible, 1: errors, 2: so-so, 3: easy) ")
+    while difficulty_input not in ["0", "1", "2", "3"]:
+        difficulty_input = input("That is not an option. Please enter 0 (impossible), 1 (errors), 2 (so-so), or 3 (easy)" )
     update_metadata(indexfilepath, filename, int(difficulty_input))
 
     # If no problems left, notify user and exit

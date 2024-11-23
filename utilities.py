@@ -4,7 +4,7 @@ import random
 import os
 from os import listdir
 from os.path import isfile, join
-
+from enum import Enum
 
 def initialise_config(index_filepath, file_list):
     try:
@@ -38,37 +38,42 @@ def update_metadata(index_filepath, filename, rating_input):
         index_dict = {}
     
     # Convert difficulty from 1, 2, 3 to 
-    input_to_difficulty_map = {
-        1: 0, # "Easy"
+    input_to_ease_map = {
+        0: 0, # "Impossible"
+        1: 1, # "Errors"
         2: 5, # "So-so"
-        3: 10, # "Hard"
+        3: 10, # "Easy"
     }
 
     completion_count = index_dict[filename].get("completion_count", 0) + 1
-    current_rating = input_to_difficulty_map[rating_input]
-    previous_difficulty = index_dict[filename].get("difficulty", None)
-    if previous_difficulty == None:
-        previous_difficulty = current_rating
+    current_rating = input_to_ease_map[rating_input]
+    previous_ease = index_dict[filename].get("difficulty", None)
+    if previous_ease == None:
+        previous_ease = current_rating
 
-    updated_difficulty = int(round((float(previous_difficulty) + float(current_rating)) / 2, 0))
-    print(updated_difficulty)
+    updated_ease = int(round((float(previous_ease) + float(current_rating)) / 2, 0))
 
     index_dict[filename]["last_seen"] = datetime.now()
     index_dict[filename]["completion_count"] = completion_count
-    index_dict[filename]["difficulty"] = updated_difficulty
+    index_dict[filename]["ease"] = updated_ease
 
     with open(index_filepath, 'w') as index_file:
         yaml.dump(index_dict, index_file, default_flow_style=False, sort_keys=False)
 
+class CardCategory(Enum):
+    NEW = 0
+    HARD = 1
+    NORMAL = 2
+
 def card_sort_key(card):
-    # Returns a tuple containing key for sorting (new_card_sort, difficulty, date last seen)
-    last_seen = card[1]["last_seen"]
-    difficulty = card[1]["difficulty"] if card[1]["difficulty"] != None else 5
-    print(difficulty)
-    if last_seen is None:
-        return (0, -difficulty, datetime.min)
-    else:
-        return (1, -difficulty, last_seen)
+    '''Returns a tuple containing key for sorting cards.'''
+    is_new = card[1]["last_seen"] is None
+    last_seen = datetime.min if is_new else card[1]["last_seen"]
+    ease = 5 if card[1]["ease"] is None else card[1]["ease"]
+
+    category = CardCategory.NEW.value if is_new else CardCategory.HARD.value if ease < 5 else CardCategory.NORMAL.value
+
+    return (category, ease, last_seen)
 
 def get_prompts(working_dir):
     indexfilepath = f"{working_dir}/._index"
