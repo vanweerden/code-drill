@@ -20,7 +20,7 @@ def initialise_config(index_filepath, file_list):
         if filename not in index_dict:
             index_dict[filename] = {
                 'last_seen': None,
-                'difficulty': None,
+                'ease': None,
                 'completion_count': 0
             }
 
@@ -30,28 +30,19 @@ def initialise_config(index_filepath, file_list):
     
     return index_dict
 
-def update_metadata(index_filepath, filename, rating_input):
+def update_metadata(index_filepath, filename, ease):
     try:
         with open(index_filepath, 'r') as file:
             index_dict = yaml.safe_load(file) or {}
     except FileNotFoundError:
         index_dict = {}
-    
-    # Convert difficulty from 1, 2, 3 to 
-    input_to_ease_map = {
-        0: 0, # "Impossible"
-        1: 1, # "Errors"
-        2: 5, # "So-so"
-        3: 10, # "Easy"
-    }
 
     completion_count = index_dict[filename].get("completion_count", 0) + 1
-    current_rating = input_to_ease_map[rating_input]
     previous_ease = index_dict[filename].get("difficulty", None)
     if previous_ease == None:
-        previous_ease = current_rating
+        previous_ease = ease
 
-    updated_ease = int(round((float(previous_ease) + float(current_rating)) / 2, 0))
+    updated_ease = int(round((float(previous_ease) + float(ease)) / 2, 0))
 
     index_dict[filename]["last_seen"] = datetime.now()
     index_dict[filename]["completion_count"] = completion_count
@@ -67,7 +58,7 @@ class CardCategory(Enum):
 
 def card_sort_key(card):
     '''Returns a tuple containing key for sorting cards.'''
-    is_new = card[1]["last_seen"] is None
+    is_new = card[1]["last_seen"] is None or card[1]["ease"] is None
     last_seen = datetime.min if is_new else card[1]["last_seen"]
     ease = 5 if card[1]["ease"] is None else card[1]["ease"]
 

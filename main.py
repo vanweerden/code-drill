@@ -37,6 +37,7 @@ while keep_studying:
         print("DEBUG <filename>:", filename)
 
     print("Subject:", subject.upper())
+    # TODO: Print difficulty here
     print(prompt)
     confirm_see_solution = input("\nPress any key to see solution")
     
@@ -45,9 +46,9 @@ while keep_studying:
     print("\n==========================================\n")
     
     # GET DIFFICULTY
-    difficulty_input = input("How difficult was that? (0: impossible, 1: errors, 2: so-so, 3: easy) ")
-    while difficulty_input not in ["0", "1", "2", "3"]:
-        difficulty_input = input("That is not an option. Please enter 0 (impossible), 1 (errors), 2 (so-so), or 3 (easy)" )
+    difficulty_input = input("How difficult was that? (0-10 where 0 is impossible and 10 is trivial) ")
+    while not difficulty_input.isnumeric() and int(difficulty_input) not in range(0,11):
+        difficulty_input = input("That is not an option. Please a number between 1 and 10 (0: impossible and 10: trivial))" )
     update_metadata(indexfilepath, filename, int(difficulty_input))
 
     # If no problems left, notify user and exit
