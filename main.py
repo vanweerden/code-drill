@@ -4,13 +4,13 @@ import sys
 import os
 from os import listdir
 from os.path import isfile, join
-import importlib.util
 import keyboard
 import yaml
 import time
-from CardIndex import CardIndex
 import random
 from enum import Enum
+from CardIndex import CardIndex
+from Card import Card
 
 verbose = True
 
@@ -18,7 +18,6 @@ class CardCategory(Enum):
     NEW = 0
     HARD = 1
     NORMAL = 2
-
 
 def get_working_directory():
     options = {}
@@ -48,7 +47,10 @@ def main():
     filenames = [f for f in listdir(working_dir) if isfile(join(working_dir, f)) and f != "._index"]
     
     card_index = CardIndex(indexfilepath, filenames)
+
+    # TODO: Combine these
     prompts = list(dict(sorted(card_index.index_dict.items(), key=card_sort_key)))
+    cards = [Card(os.path.join(working_dir, file)) for file in filenames]
 
     clear_terminal_screen()
 
@@ -58,25 +60,19 @@ def main():
     problem_count = len(prompts)
     while keep_studying:
         filename = prompts[index]
-        filepath = f"{working_dir}/{filename}"
-        spec = importlib.util.spec_from_file_location(f"module.{filename}", filepath)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        subject = getattr(module, 'subject', None)
-        prompt = getattr(module, 'prompt', None)
-        solution = getattr(module, 'solution', None)
+        card = cards[index]
 
         print("\n================ QUESTION ================\n")
         if verbose:
             print("DEBUG <filename>:", filename)
 
-        print("Subject:", subject.upper())
+        print("Subject:", card.subject.upper())
         # TODO: Print difficulty here
-        print(prompt)
+        print(card.prompt)
         confirm_see_solution = input("\nPress any key to see solution")
         
         print("\n================ SOLUTION ================\n")
-        print(solution)
+        print(card.solution)
         print("\n==========================================\n")
         
         # GET DIFFICULTY
