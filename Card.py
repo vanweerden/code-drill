@@ -2,8 +2,8 @@ import importlib.util
 
 class Card():
     def __init__(self, filepath):
-        filename = filepath.split("/")[-1]
-        spec = importlib.util.spec_from_file_location(f"module.{filename}", filepath)
+        self.filename = filepath.split("/")[-1]
+        spec = importlib.util.spec_from_file_location(f"module.{self.filename}", filepath)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
 

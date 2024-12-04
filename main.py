@@ -48,7 +48,7 @@ def main():
     
     card_index = CardIndex(indexfilepath, filenames)
 
-    # TODO: Combine these
+    # TODO: Combine these (ust need to sort cards)
     prompts = list(dict(sorted(card_index.index_dict.items(), key=card_sort_key)))
     cards = [Card(os.path.join(working_dir, file)) for file in filenames]
 
@@ -60,7 +60,7 @@ def main():
     problem_count = len(prompts)
     while keep_studying:
         filename = prompts[index]
-        card = cards[index]
+        card = list(filter(lambda c: c.filename == filename, cards))[0]
 
         print("\n================ QUESTION ================\n")
         if verbose:
@@ -77,7 +77,7 @@ def main():
         
         # GET DIFFICULTY
         difficulty_input = input("How difficult was that? (0-10 where 0 is impossible and 10 is trivial) ")
-        while not difficulty_input.isnumeric() and int(difficulty_input) not in range(0,11):
+        while not difficulty_input.isnumeric() or int(difficulty_input) not in range(0,11):
             difficulty_input = input("That is not an option. Please a number between 1 and 10 (0: impossible and 10: trivial))" )
         card_index.update_card(filename, int(difficulty_input))
 
