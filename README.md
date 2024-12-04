@@ -1,8 +1,6 @@
 # Code Drill
 Code Drill is a CLI Python program for drilling coding problems. It's basically a rudimentary flashcard system for writing code. 
 
-I am continnually adding new features and improving it as I study my degree.
-
 ## Installation
 1. Copy config-sample.yaml file as config.yaml 
 2. Update the "root-directory" setting to point to the root path where your prompts will be stored
