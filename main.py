@@ -52,12 +52,15 @@ def main():
     prompts = list(dict(sorted(card_index.index_dict.items(), key=card_sort_key)))
     cards = [Card(os.path.join(working_dir, file)) for file in filenames]
 
-    clear_terminal_screen()
-
     # BEGIN STUDY LOOP
     keep_studying = True
     index = 0
     problem_count = len(prompts)
+    if problem_count == 0:
+        print(f"No cards found in {working_dir}")
+        return -1
+
+    clear_terminal_screen()
     while keep_studying:
         filename = prompts[index]
         card = list(filter(lambda c: c.filename == filename, cards))[0]
