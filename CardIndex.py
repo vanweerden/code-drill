@@ -15,6 +15,7 @@ class CardIndex():
             self.index_dict = {}
 
         self.add_new_files()
+        self.remove_missing_files()
     
     def add_new_files(self):
         for filename in self.file_list:
@@ -27,6 +28,13 @@ class CardIndex():
 
         with open(self.index_filepath, 'w') as index_file:
             yaml.dump(self.index_dict, index_file, default_flow_style=False, sort_keys=False)
+
+    def remove_missing_files(self):
+        # Iterate over index file
+        for filename in self.index_dict:
+            if filename not in self.file_list:
+                # TODO: Actually remove file
+                print(f"Couldn't find {filename} file")
 
     def update_card(self, filename, ease_rating):
         completion_count = self.index_dict[filename].get("completion_count", 0) + 1

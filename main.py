@@ -63,7 +63,16 @@ def main():
     clear_terminal_screen()
     while keep_studying:
         filename = prompts[index]
-        card = list(filter(lambda c: c.filename == filename, cards))[0]
+        
+        card = None
+        try:
+            card = list(filter(lambda c: c.filename == filename, cards))[0]
+        except IndexError:
+            # File doesn't exist: Skip
+            if verbose:
+                print(f"DEBUG: File {filename} doesn't exist. Skipping.")
+            index += 1
+            continue
 
         print("\n================ QUESTION ================\n")
         if verbose:
