@@ -2,6 +2,7 @@
 
 import sys
 import os
+from datetime import datetime
 from os import listdir
 from os.path import isfile, join
 import keyboard
@@ -30,15 +31,29 @@ def clear_terminal_screen():
     clear = lambda: os.system('clear')
     clear()
 
+def get_composite_score(last_seen, ease):
+    """Combines normalized score from last_seen and ease for composite sort value
+    """
+    # These must add up to 1
+    ease_weight = 0.6
+    recency_weight = 1-ease_weight
+
+    normalized_ease = ease / 10
+    elapsed_days = (datetime.now() - last_seen).days
+    recency_score = max(0, 1 - (elapsed_days / 365))
+    composite_score = (recency_score * recency_weight) + (ease_weight * normalized_ease)
+    return composite_score
+
 def card_sort_key(card):
-    '''Returns a tuple containing key for sorting cards.'''
+    '''Returns a tuple containing key for sorting cards in this order: New cards then harder cards.'''
     is_new = card[1]["last_seen"] is None or card[1]["ease"] is None
+
+    # Get composite score from last_seen and ease
     last_seen = datetime.min if is_new else card[1]["last_seen"]
     ease = 5 if card[1]["ease"] is None else card[1]["ease"]
+    composite_score = get_composite_score(last_seen, ease)
 
-    category = CardCategory.NEW.value if is_new else CardCategory.HARD.value if ease < 5 else CardCategory.NORMAL.value
-
-    return (category, ease, last_seen)
+    return (is_new, composite_score)
 
 def main():
     # INITTIALISE
