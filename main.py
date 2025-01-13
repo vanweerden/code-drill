@@ -53,7 +53,9 @@ def card_sort_key(card):
     ease = 5 if card[1]["ease"] is None else card[1]["ease"]
     composite_score = get_composite_score(last_seen, ease)
 
-    return (is_new, composite_score)
+    print(card)
+    print(is_new)
+    return (not is_new, composite_score)
 
 def main():
     # INITTIALISE
